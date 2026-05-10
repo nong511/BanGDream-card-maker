@@ -488,6 +488,11 @@ body {
   -webkit-text-stroke: 2px white;
   paint-order: stroke fill;
 }
+.header-title-stroke .title-text .main,
+.header-title-stroke .title-text .sub {
+  -webkit-text-stroke: 1px white;
+  paint-order: stroke fill;
+}
 
 .modal-overlay {
   display:none; position:fixed; inset:0;
@@ -1266,6 +1271,13 @@ function setOverlayTone(tone) {
   }
   overlay.style.background = toneColor;
   cardOverlay.style.background = toneColor;
+  // 어둡게일 때 헤더 타이틀 텍스트 stroke 1px
+  const card = document.getElementById('card');
+  if (tone === 'dark') {
+    card.classList.add('header-title-stroke');
+  } else {
+    card.classList.remove('header-title-stroke');
+  }
   // 이미지 없고 단색일 때 header 배경 복구
   const headerBgImg = document.getElementById('headerBgImg');
   if (!headerBgImg.src || headerBgImg.style.display === 'none') {
