@@ -844,6 +844,8 @@ body {
   </div>
 </div>
 
+<p id="birthdayMsg" style="font-size:11px;color:#aaa;margin:16px 0 0;text-align:center;letter-spacing:0.05em;">Happy Birthday, KANON!</p>
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
@@ -1757,7 +1759,8 @@ async function saveImage() {
   const hideEls = [
     document.getElementById('headerEditBtn'),
     document.getElementById('colorBar'),
-    document.getElementById('cardBottomShadow')
+    document.getElementById('cardBottomShadow'),
+    document.getElementById('birthdayMsg')
   ].filter(Boolean);
   hideEls.forEach(el => { if(el) el.style.display='none'; });
 
