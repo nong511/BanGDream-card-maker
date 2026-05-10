@@ -1711,6 +1711,111 @@ function openEditorWithOriginal(target, imgEl, cfg) {
 
 // ===== LOCAL STORAGE =====
 
+// ===== 내보내기 / 불러오기 =====
+function exportData() {
+  const data = {
+    version: 1,
+    nickname: document.querySelector('.nickname-text')?.innerText || '',
+    atId: document.querySelector('.at-id-input')?.innerText || '',
+    age: document.getElementById('age-value')?.textContent || '선택',
+    server: document.getElementById('server-value')?.textContent || '선택',
+    friendCode: document.querySelector('.id-value')?.innerText || '',
+    actChips: [...document.querySelectorAll('.chip-group')[0]?.querySelectorAll('.chip')||[]].map(c=>c.classList.contains('active')),
+    actKita: document.getElementById('act-ki')?.value || '',
+    actKitaOn: document.querySelector('#act-kita .chip')?.classList.contains('active') || false,
+    twChips: [...document.querySelectorAll('.chip-group')[1]?.querySelectorAll('.chip')||[]].map(c=>c.classList.contains('active')),
+    twKita: document.getElementById('tw-ki')?.value || '',
+    twKitaOn: document.querySelector('#tw-kita .chip')?.classList.contains('active') || false,
+    fubO: document.getElementById('fub-o')?.classList.contains('active') || false,
+    fubX: document.getElementById('fub-x')?.classList.contains('active') || false,
+    tagO: document.getElementById('tag-o')?.classList.contains('active') || false,
+    tagX: document.getElementById('tag-x')?.classList.contains('active') || false,
+    textBoxes: [...document.querySelectorAll('.text-box')].map(t=>t.value),
+    bandActive: [...document.querySelectorAll('.band-btn')].map(b=>b.classList.contains('active')),
+    oshiCount,
+    oshiNames: window._oshiNames || [],
+    cpOn,
+    cpList: cpList.map(cp=>({name:cp.name||'', img1:cp.img1||null, img2:cp.img2||null})),
+    reverseO: document.getElementById('reverseO')?.classList.contains('active')||false,
+    reverseX: document.getElementById('reverseX')?.classList.contains('active')||false,
+    reversibleO: document.getElementById('reversibleO')?.classList.contains('active')||false,
+    reversibleX: document.getElementById('reversibleX')?.classList.contains('active')||false,
+    mainColor: document.getElementById('pickerMain')?.value || '#f65d88',
+    subColor: document.getElementById('pickerSub')?.value || '#ffc7d8',
+    overlayTone: currentTone || 'none',
+    solidColor: document.getElementById('solidColorPicker')?.value || '#b8d4f8',
+    strokeOn,
+    avatarSrc: document.getElementById('avatarImg')?.src?.startsWith('data:') ? document.getElementById('avatarImg').src : null,
+    oshiData: window._oshiData || [],
+    headerBgSrc: document.getElementById('cardHeaderBgImg')?.src?.startsWith('data:') ? document.getElementById('cardHeaderBgImg').src : null,
+    imgStore,
+  };
+  const blob = new Blob([JSON.stringify(data)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '뱅드림_자기소개표_백업.json';
+  a.click();
+}
+
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      const d = JSON.parse(ev.target.result);
+      if (d.nickname != null) document.querySelector('.nickname-text').innerText = d.nickname;
+      if (d.atId != null) document.querySelector('.at-id-input').innerText = d.atId;
+      if (d.age && d.age !== '선택') document.getElementById('age-value').textContent = d.age;
+      if (d.server && d.server !== '선택') document.getElementById('server-value').textContent = d.server;
+      if (d.friendCode != null) document.querySelector('.id-value').innerText = d.friendCode;
+      const cg = document.querySelectorAll('.chip-group');
+      if (d.actChips && cg[0]) [...cg[0].querySelectorAll('.chip')].forEach((c,i)=>c.classList.toggle('active',!!d.actChips[i]));
+      if (d.actKitaOn) { document.querySelector('#act-kita .chip')?.classList.add('active'); const inp=document.getElementById('act-ki'); if(inp){inp.classList.add('visible');inp.value=d.actKita||'';} }
+      if (d.twChips && cg[1]) [...cg[1].querySelectorAll('.chip')].forEach((c,i)=>c.classList.toggle('active',!!d.twChips[i]));
+      if (d.twKitaOn) { document.querySelector('#tw-kita .chip')?.classList.add('active'); const inp=document.getElementById('tw-ki'); if(inp){inp.classList.add('visible');inp.value=d.twKita||'';} }
+      document.getElementById('fub-o')?.classList.toggle('active',!!d.fubO);
+      document.getElementById('fub-x')?.classList.toggle('active',!!d.fubX);
+      document.getElementById('tag-o')?.classList.toggle('active',!!d.tagO);
+      document.getElementById('tag-x')?.classList.toggle('active',!!d.tagX);
+      if (d.textBoxes) [...document.querySelectorAll('.text-box')].forEach((t,i)=>{ if(d.textBoxes[i]!=null){t.value=d.textBoxes[i];autoResize(t);} });
+      if (d.bandActive) [...document.querySelectorAll('.band-btn')].forEach((b,i)=>b.classList.toggle('active',!!d.bandActive[i]));
+      if (d.oshiCount) oshiCount = d.oshiCount;
+      if (d.oshiNames) window._oshiNames = d.oshiNames;
+      if (d.oshiData) window._oshiData = d.oshiData;
+      renderOshi(); updateOshiBtns();
+      if (typeof d.cpOn !== 'undefined') {
+        cpOn = d.cpOn;
+        document.getElementById('cpToggle')?.classList.toggle('off', !cpOn);
+        document.getElementById('cpLabel').style.display = cpOn ? '' : 'none';
+        document.getElementById('cpSection').style.display = cpOn ? '' : 'none';
+        document.getElementById('cpPmBtns').style.display = cpOn ? 'flex' : 'none';
+      }
+      if (d.cpList) cpList = d.cpList.map(cp=>({...cp}));
+      renderCP(); updateCPBtns();
+      document.getElementById('reverseO')?.classList.toggle('active',!!d.reverseO);
+      document.getElementById('reverseX')?.classList.toggle('active',!!d.reverseX);
+      document.getElementById('reversibleO')?.classList.toggle('active',!!d.reversibleO);
+      document.getElementById('reversibleX')?.classList.toggle('active',!!d.reversibleX);
+      if (d.mainColor) { document.getElementById('pickerMain').value=d.mainColor; document.getElementById('fillMain').style.background=d.mainColor; applyMainColor(d.mainColor); }
+      if (d.subColor) { document.getElementById('pickerSub').value=d.subColor; document.getElementById('fillSub').style.background=d.subColor; applySubColor(d.subColor); }
+      if (d.strokeOn !== strokeOn) toggleStroke();
+      if (d.avatarSrc) { const img=document.getElementById('avatarImg'); img.src=d.avatarSrc; img.style.display='block'; document.getElementById('avatarHint').style.display='none'; }
+      if (d.imgStore) { Object.keys(imgStore).forEach(k=>delete imgStore[k]); Object.assign(imgStore, d.imgStore); }
+      if (d.headerBgSrc) {
+        const bg=document.getElementById('headerBgImg'), cbg=document.getElementById('cardHeaderBgImg');
+        if(bg){bg.src=d.headerBgSrc;bg.style.display='block';}
+        if(cbg){cbg.src=d.headerBgSrc;cbg.style.display='block';document.getElementById('cardHeaderLayer').style.background='transparent';}
+        document.getElementById('header').style.background='transparent';
+      }
+      if (d.overlayTone && d.overlayTone !== 'none') setOverlayTone(d.overlayTone);
+      alert('불러오기 완료!');
+    } catch(err) { alert('파일을 읽을 수 없어요.'); console.error(err); }
+    e.target.value = '';
+  };
+  r.readAsText(file);
+}
+
 function resetAll() {
   if (!confirm('모든 내용을 초기화할까요?')) return;
   localStorage.removeItem('bangdream_card');
