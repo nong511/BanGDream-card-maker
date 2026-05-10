@@ -1820,7 +1820,7 @@ function importData(e) {
         if(cbg){cbg.src=d.headerBgSrc;cbg.style.display='block';document.getElementById('cardHeaderLayer').style.background='transparent';}
         document.getElementById('header').style.background='transparent';
       }
-      if (d.overlayTone && d.overlayTone !== 'none') setOverlayTone(d.overlayTone);
+      setOverlayTone(d.overlayTone || 'none');
       alert('불러오기 완료!');
     } catch(err) { alert('파일을 읽을 수 없어요.'); console.error(err); }
     e.target.value = '';
